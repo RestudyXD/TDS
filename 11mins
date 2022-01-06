@@ -1,7 +1,7 @@
 local TDS = loadstring(game:HttpGet("https://raw.githubusercontent.com/banbuskox/dfhtyxvzexrxgfdzgzfdvfdz/main/ckmhjvskfkmsStratFun2", true))()
 TDS:Loadout("Gladiator", "Accelerator", "Farm", "Commander", "DJ Booth")
 TDS:Map("Winter Bridges", true, "Survival")
-TDS:Mode("Molten")
+TDS:Mode("Normal")
 TDS:Place("Gladiator", 12.683943, 0.038559, -1.983098, 0, 0, 25)
 TDS:Place("Gladiator", 10.676970, 0.038562, -1.977470, 0, 0, 21)
 TDS:Place("Farm", 9.883188, -0.460176, 14.144072, 1, 0, 5)
