@@ -1,5 +1,4 @@
-local highlightLib = {}
-highlightLib.Settings = {
+local highlightLib = {
 	Enabled = false,
 	FillColor = Color3.fromRGB(200, 90, 255),
 	OutlineColor = Color3.fromRGB(255, 119, 215),
@@ -23,6 +22,23 @@ end
 
 highlightsFolder.Parent = folderLocation
 local renderedTargets = {}
+
+function highlightLib:Toggle(bool)
+    self.Enabled = bool
+    if not bool then
+        for i,v in pairs(self.Objects) do
+            if v.Type == "Box" then --fov circle etc
+                if v.Temporary then
+                    v:Remove()
+                else
+                    for i,v in pairs(v.Components) do
+                        v.Visible = false
+                    end
+                end
+            end
+        end
+    end
+end
 
 function highlightLib:addEsp(targetModel:Model)
 	if table.find(renderedTargets,targetModel) then--preventing duplicates, this is a way to fix my psx script lol 
