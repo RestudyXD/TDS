@@ -9,7 +9,7 @@ highlightLib.Settings = {
 }
 
 local highlightsFolder = Instance.new("Folder")
-if self.Settings.Enabled == false then
+if highlightLib.Settings.Enabled == false then
     highlightsFolder:Destroy()
 end
 highlightsFolder.Name = "Rendered Highlights"
