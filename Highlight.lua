@@ -1,5 +1,6 @@
 local highlightLib = {}
 highlightLib.Settings = {
+	Enabled = false,
 	FillColor = Color3.fromRGB(200, 90, 255),
 	OutlineColor = Color3.fromRGB(255, 119, 215),
 	FillTransparency = 0.65,
@@ -8,6 +9,9 @@ highlightLib.Settings = {
 }
 
 local highlightsFolder = Instance.new("Folder")
+if self.Settings.Enabled == false then
+    highlightsFolder:Destroy()
+end
 highlightsFolder.Name = "Rendered Highlights"
 local folderLocation
 if hookfunction then
@@ -17,7 +21,7 @@ else
 end
 local alreadyLoaded = folderLocation:FindFirstChild("Rendered Highlights")
 if alreadyLoaded then
-    alreadyLoaded:Destroy()--just wiping the old folder in case it gets re-executed
+    alreadyLoaded:Destroy()
 end
 
 highlightsFolder.Parent = folderLocation
@@ -52,7 +56,7 @@ end
 function highlightLib:loadSettings(Settings)
 	self.Settings = Settings
 	for i,Highlight in ipairs(highlightsFolder:GetChildren()) do
-		for Name,Value in next, self.Settings do-- ;-;
+		for Name,Value in next, self.Settings do
 			Highlight[Name] = Value
 		end
 	end
