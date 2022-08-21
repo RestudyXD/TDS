@@ -9,9 +9,6 @@ highlightLib.Settings = {
 }
 
 local highlightsFolder = Instance.new("Folder")
-if highlightLib.Settings.Enabled == false then
-    highlightsFolder:Destroy()
-end
 highlightsFolder.Name = "Rendered Highlights"
 local folderLocation
 if hookfunction then
