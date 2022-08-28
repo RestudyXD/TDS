@@ -318,8 +318,9 @@ function ESP:Add(obj, options)
 	
 	if options.Name == "obj.SurfaceGui.jmeno1.Text" then
 		options.Name = nil
+		print("y")
 	end
-
+	print(options.Name)
 	local box = setmetatable({
 		Name = options.Name or obj.Name,
 		Type = "Box",
