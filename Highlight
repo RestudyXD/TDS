@@ -315,6 +315,10 @@ function ESP:Add(obj, options)
 	if not obj.Parent and not options.RenderInNil then
 		return warn(obj, "has no parent")
 	end
+	
+	if options.Name == "obj.SurfaceGui.jmeno1.Text" then
+		options.Name = obj.SurfaceGui.jmeno1.Text
+	end
 
 	local box = setmetatable({
 		Name = options.Name or obj.Name,
