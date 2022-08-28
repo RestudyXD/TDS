@@ -109,7 +109,8 @@ function ESP:AddObjectListener(parent, options)
 						ColorDynamic = options.ColorDynamic,
 						Name = type(options.CustomName) == "function" and options.CustomName(c) or options.CustomName,
 						IsEnabled = options.IsEnabled,
-						RenderInNil = options.RenderInNil
+						RenderInNil = options.RenderInNil,
+						ctype = options.ctype
 					})
 					--TODO: add a better way of passing options
 					if options.OnAdded then
@@ -316,13 +317,11 @@ function ESP:Add(obj, options)
 		return warn(obj, "has no parent")
 	end
 	
-	if options.Name == "obj.SurfaceGui.jmeno1.Text" then
-		options.Name = nil
-		print("y")
+	if options.ctype == "Sign" then
+		local ntext = obj.SurfaceGui.jmeno1.Text
 	end
-	print(options.Name)
 	local box = setmetatable({
-		Name = options.Name or obj.Name,
+		Name = options.Name or ntext or obj.Name,
 		Type = "Box",
 		Color = options.Color --[[or self:GetColor(obj)]],
 		Size = options.Size or self.BoxSize,
