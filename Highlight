@@ -319,6 +319,7 @@ function ESP:Add(obj, options)
 	
 	if options.ctype == "Sign" then
 		local ntext = obj.SurfaceGui.jmeno1.Text
+		print(ntext)
 	end
 	local box = setmetatable({
 		Name = options.Name or ntext or obj.Name,
