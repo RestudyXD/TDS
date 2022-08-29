@@ -17,6 +17,9 @@ local player = players.LocalPlayer
 local mouse = player:GetMouse()
 local camera = game.Workspace.CurrentCamera
 
+local AkaliNotif = loadstring(game:HttpGet("https://raw.githubusercontent.com/RestudyXD/TDS/main/Notify"))();
+local Notify = AkaliNotif.Notify;
+
 library.theme = {
 	fontsize = 15,
 	titlesize = 18,
@@ -2949,6 +2952,15 @@ function library:CreateWindow(name, size, hidebutton)
 				sector:FixSize()
 				table.insert(library.items, keybind)
 				return keybind
+			end
+			--[[ Notify ]]--
+			local LastNotification = 0
+			function library:SendNotification(duration, message)
+				Notify({
+					Description = message;
+					Title = "Hub";
+					Duration = duration;
+				});
 			end
 
 			function sector:AddDropdown(text, items, default, multichoice, callback, flag)
