@@ -279,8 +279,8 @@ function boxBase:Update()
 				self.Components.Tool.Visible = true
 				self.Components.Tool.Position = Vector2.new(TagPos.X, TagPos.Y - 14)
 				if self.Player.Character:FindFirstChildOfClass("Tool") then
-					local toolid = self.Player.Character:FindFirstChildOfClass("Tool").Name
-					local fixname = getValueFromKey(ItemList, toolid)
+					local toolid = tostring(self.Player.Character:FindFirstChildOfClass("Tool").Name)
+					local fixname = tostring(getValueFromKey(ItemList, toolid))
 					self.Components.Tool.Text = fixname
 					self.Components.Tool.Color = ESP.ToolColor
 				else
