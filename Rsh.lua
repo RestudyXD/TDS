@@ -420,7 +420,9 @@ function espLibrary:Load(renderValue)
                 local canShow, enabled = onScreen and (size and position), self.options.enabled;
                 local team = self.getTeam(player);
 
-                local color = self.options.teamColor and teamColor or nil;
+				local teamColor = Color3.New(1, 0, 0)
+
+                local color = self.options.teamColor and TeamColor or nil;
 
                 if (self.options.fillColor ~= nil) then
                     color = self.options.fillColor;
