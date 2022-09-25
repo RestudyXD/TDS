@@ -419,9 +419,6 @@ function espLibrary:Load(renderValue)
                 local distance = (currentCamera.CFrame.Position - torso.Position).Magnitude;
                 local canShow, enabled = onScreen and (size and position), self.options.enabled;
                 local team = self.getTeam(player);
-				print('============================')
-				print(team)
-
 				--local TeamColor = Color3.New(1, 0, 0)
 
                 --local color = self.options.teamColor and TeamColor or nil;
@@ -446,7 +443,7 @@ function espLibrary:Load(renderValue)
                     enabled = false;
                 end
 
-                if (self.options.teamCheck and (team == self.getTeam(localPlayer))) then
+                if (self.options.teamCheck and (team == tostring(self.getTeam(localPlayer)))) then
                     enabled = false;
                 end
 
