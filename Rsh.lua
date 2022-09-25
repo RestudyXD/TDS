@@ -422,7 +422,7 @@ function espLibrary:Load(renderValue)
 
 				--local TeamColor = Color3.New(1, 0, 0)
 
-                local color = self.options.teamColor and TeamColor or nil;
+                --local color = self.options.teamColor and TeamColor or nil;
 
                 if (self.options.fillColor ~= nil) then
                     color = self.options.fillColor;
