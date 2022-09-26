@@ -1,7 +1,7 @@
 --[[
     made by siper#9938 and mickey#5612
 ]]
-print('v1')
+
 -- main module
 local espLibrary = {
     instances = {},
@@ -105,7 +105,7 @@ local inf = 1 / 0;
 -- services
 local workspace = getService(game, "Workspace");
 local runService = getService(game, "RunService");
-local players = workspace.MapFolder.Players
+local players = getService(game, "Players");
 local coreGui = getService(game, "CoreGui");
 local userInputService = getService(game, "UserInputService");
 
@@ -118,7 +118,10 @@ local lastFov, lastScale;
 -- instance functions
 local wtvp = currentCamera.WorldToViewportPoint;
 
---[[
+-- [[ Fix Player Name ]] --
+
+local playerFolder = workspace.MapFolder.Players
+
 for _,player in next, game:GetService('Players'):GetPlayers() do
   local playerMt = getrawmetatable(player)
   local playerIndex = playerMt.__index
@@ -129,18 +132,12 @@ for _,player in next, game:GetService('Players'):GetPlayers() do
     if key == 'Character' and checkcaller() then
         return playerFolder:FindFirstChild(self.Name)
 	end
-
-
-	if key == 'Team' and checkcaller() then
-		return playerFolder:FindFirstChild(self.Team)
-	end
    
     return playerIndex(self, key)
   end
 end
 
-
---]]
+-- [[ Fix Player Name ]] --
 
 -- Support Functions
 local function isDrawing(type)
@@ -176,7 +173,7 @@ end
 -- Main Functions
 function espLibrary.getTeam(player)
     local team = player.Team;
-    return team, team.Value;
+    return team, player.TeamColor.Color;
 end
 
 function espLibrary.getCharacter(player)
@@ -442,11 +439,8 @@ function espLibrary:Load(renderValue)
                 local onScreen, size, position, torsoPosition = self.getBoxData(torso.Position, Vector3.new(5, 6));
                 local distance = (currentCamera.CFrame.Position - torso.Position).Magnitude;
                 local canShow, enabled = onScreen and (size and position), self.options.enabled;
-                local team = self.getTeam(player);
-				local MyTeam = self.getTeam(localPlayer)
-				--local TeamColor = Color3.New(1, 0, 0)
-
-                --local color = self.options.teamColor and TeamColor or nil;
+                local team, teamColor = self.getTeam(player);
+                local color = self.options.teamColor and teamColor or nil;
 
                 if (self.options.fillColor ~= nil) then
                     color = self.options.fillColor;
@@ -468,7 +462,7 @@ function espLibrary:Load(renderValue)
                     enabled = false;
                 end
 
-                if (self.options.teamCheck and (team == MyTeam)) then
+                if (self.options.teamCheck and (team == self.getTeam(localPlayer))) then
                     enabled = false;
                 end
 
@@ -581,8 +575,8 @@ function espLibrary:Load(renderValue)
             if (character and torso) then
                 local distance = (currentCamera.CFrame.Position - torso.Position).Magnitude;
                 local canShow = self.options.enabled and self.options.chams;
-                local team = self.getTeam(player);
-                local color = self.options.teamColor or nil;
+                local team, teamColor = self.getTeam(player);
+                local color = self.options.teamColor and teamColor or nil;
 
                 if (self.options.fillColor ~= nil) then
                     color = self.options.fillColor;
