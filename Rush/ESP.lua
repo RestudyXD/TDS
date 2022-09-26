@@ -105,7 +105,7 @@ local inf = 1 / 0;
 -- services
 local workspace = getService(game, "Workspace");
 local runService = getService(game, "RunService");
-local players = getService(game, "Players");
+local players = game:GetService("Workspace").MapFolder.Players
 local coreGui = getService(game, "CoreGui");
 local userInputService = getService(game, "UserInputService");
 
@@ -122,6 +122,7 @@ local wtvp = currentCamera.WorldToViewportPoint;
 
 local playerFolder = workspace.MapFolder.Players
 
+--[[
 for _,player in next, game:GetService('Players'):GetPlayers() do
   local playerMt = getrawmetatable(player)
   local playerIndex = playerMt.__index
@@ -133,6 +134,7 @@ for _,player in next, game:GetService('Players'):GetPlayers() do
         return playerFolder:FindFirstChild(self.Name)
 	end
 
+
 	if key == 'Team' and checkcaller() then
 		return playerFolder:FindFirstChild(self.Team)
 	end
@@ -142,6 +144,8 @@ for _,player in next, game:GetService('Players'):GetPlayers() do
 end
 
 -- [[ Fix Player Name ]] --
+
+--]]
 
 -- Support Functions
 local function isDrawing(type)
