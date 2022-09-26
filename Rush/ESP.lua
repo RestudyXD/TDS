@@ -1,7 +1,7 @@
 --[[
     made by siper#9938 and mickey#5612
 ]]
-
+print('v1')
 -- main module
 local espLibrary = {
     instances = {},
@@ -105,7 +105,7 @@ local inf = 1 / 0;
 -- services
 local workspace = getService(game, "Workspace");
 local runService = getService(game, "RunService");
-local players = game:GetService("Workspace").MapFolder.Players
+local players = workspace.MapFolder.Players
 local coreGui = getService(game, "CoreGui");
 local userInputService = getService(game, "UserInputService");
 
@@ -117,10 +117,6 @@ local lastFov, lastScale;
 
 -- instance functions
 local wtvp = currentCamera.WorldToViewportPoint;
-
--- [[ Fix Player Name ]] --
-
-local playerFolder = workspace.MapFolder.Players
 
 --[[
 for _,player in next, game:GetService('Players'):GetPlayers() do
@@ -143,7 +139,6 @@ for _,player in next, game:GetService('Players'):GetPlayers() do
   end
 end
 
--- [[ Fix Player Name ]] --
 
 --]]
 
