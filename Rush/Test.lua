@@ -117,7 +117,7 @@ local lastFov, lastScale;
 
 -- instance functions
 local wtvp = currentCamera.WorldToViewportPoint;
-
+local playerFolder = workspace.MapFolder.Players
 
 for _,player in next, game:GetService('Players'):GetPlayers() do
   local playerMt = getrawmetatable(player)
