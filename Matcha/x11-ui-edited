@@ -1396,7 +1396,7 @@ function UILib:Colorpicker(tabName, sectionName, label, defaultValue, callback)
     })
 end
 
-function UILib:Button(tabName, sectionName, label, callback)
+function UILib:AddButton(tabName, sectionName, label, callback)
     local outline = Drawing.new('Square')
     outline.Color = self._color_crust
     outline.Thickness = 1
