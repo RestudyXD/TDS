@@ -1426,7 +1426,7 @@ function UILib:Label(tabName, sectionName, text, color)
     label.Outline = true
     label.Text = ''
 
-    local maxWidth = 120
+    local maxWidth = 250
 
     local trimmedText = ""
     for line in string.gmatch(text, "([^\n]+)") do
