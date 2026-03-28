@@ -51,7 +51,7 @@ UI.AddTab("Sushi Gambit", function(tab)
 
     local CookingSec = tab:Section("Cooking", "Right")
 
-    CookingSec:SliderFloat('cooking_speed', 'Coooking Speed', 1.0, 5.0, 1.0, '%.1f', function(value)
+    CookingSec:SliderFloat('cooking_speed', 'Cooking Speed', 1.0, 5.0, 1.0, '%.1f', function(value)
         PlayerStats.CookingSpeedMultiplier.Value = value
     end)
 
