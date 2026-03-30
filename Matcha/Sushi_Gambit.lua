@@ -17,6 +17,7 @@ function get_offsets()
 end
 
 local ScreenGuiEnabled = get_offsets()["Offsets"]["GuiObject"]["ScreenGui_Enabled"]
+local HoldDuration = get_offsets()["Offsets"]["ProximityPrompt"]["HoldDuration"]
 
 UI.AddTab("Sushi Gambit", function(tab)
     local MainSec = tab:Section("Main", "Left")
@@ -25,13 +26,14 @@ UI.AddTab("Sushi Gambit", function(tab)
         notify("Auto Cooking: " .. tostring(value), "", 3)
     end)
 
-    MainSec:Toggle('auto_washing', 'Auto Washing', function(value)
-        notify("Auto Washing: " .. tostring(value), "", 3)
+    MainSec:Toggle('auto_washing', 'Auto DishWashing', function(value)
+        notify("Auto DishWashing: " .. tostring(value), "", 3)
     end)
 
     MainSec:Toggle('auto_chloroform_spys', 'Auto Chloroform Spys', function(value)
         notify("Auto Chloroform Spys: " .. tostring(value), "", 3)
     end)
+
 
     MainSec:Spacing()
     MainSec:Text("Player")
@@ -49,6 +51,45 @@ UI.AddTab("Sushi Gambit", function(tab)
         end
     end)
 
+    MainSec:SliderInt('player_walkspeed', 'Walk Speed', 12, 20, 1, function(value)
+        PlayerStats.WalkSpeed.Value = value
+    end)
+
+    MainSec:Spacing()
+    MainSec:Text("Accessories")
+    MainSec:Tip("Spoofing accessories. It will not showing until you own it. But you will get the boost")
+    MainSec:Spacing()
+
+    local Hat = {
+        "BCHardHat",
+        "Pager",
+        "ChefHat",
+        "RobloxVisor",
+        "Pencil",
+        "HeadLeaves"
+    }
+
+    MainSec:Combo("acc_slot1", "Slot1", Hat, 0, function(idx, text)
+        LocalPlayer.Accessories.HatSlots["1"].Value = text
+        notify("Accessory slot 1 changed to: " .. text, "", 3)
+    end)
+
+    MainSec:Combo("acc_slot2", "Slot2", Hat, 0, function(idx, text)
+        LocalPlayer.Accessories.HatSlots["2"].Value = text
+        notify("Accessory slot 2 changed to: " .. text, "", 3)
+    end)
+
+    MainSec:Combo("acc_slot3", "Slot3", Hat, 0, function(idx, text)
+        LocalPlayer.Accessories.HatSlots["3"].Value = text
+        notify("Accessory slot 3 changed to: " .. text, "", 3)
+    end)
+
+    MainSec:Combo("acc_slot4", "Slot4", Hat, 0, function(idx, text)
+        LocalPlayer.Accessories.HatSlots["4"].Value = text
+        notify("Accessory slot 4 changed to: " .. text, "", 3)
+    end)
+
+
     local CookingSec = tab:Section("Cooking", "Right")
 
     CookingSec:SliderFloat('cooking_speed', 'Cooking Speed', 1.0, 5.0, 1.0, '%.1f', function(value)
@@ -62,9 +103,37 @@ UI.AddTab("Sushi Gambit", function(tab)
     CookingSec:SliderInt('conveyor_speed', 'Conveyor Speed', 1, 10, 1, function(value)
         GameData.ConveyorSpeedValue.Value = value
     end)
+
+    CookingSec:Spacing()
+    CookingSec:Text("Instant ProximityPrompt")
+    CookingSec:Spacing()
+
+    CookingSec:Toggle('instant_seatcustomer', 'Seat Customer', function(value)
+        notify("Instant Seat Customer: " .. tostring(value), "", 3)
+    end)
+    CookingSec:Spacing()
+
+    CookingSec:Button('Computer', function(value)
+        local computer = game.Workspace.RestaurantArea.restaurant.Table.computer.ProximityPrompt.Address
+        memory_write("float", computer + HoldDuration, 0)
+    end)
+
+    CookingSec:Button('Freezer', function(value)
+        local freezer = game.Workspace.RestaurantArea.restaurant.FreezerDoor.PromptHitbox.ProximityPrompt.Address
+        memory_write("float", freezer + HoldDuration, 0)
+    end)
+
+    CookingSec:Button('Toolbin', function(value)
+        local toolbin = game.Workspace.Toolbin.PromptHitbox.ProximityPrompt.Address
+        memory_write("float", toolbin + HoldDuration, 0)
+    end)
+
+    CookingSec:Spacing()
+    CookingSec:Text("Version: 1.0.1\nDiscord: patreon\nchangelog:\n[+] player walkspeed\n[+] instant seat customer\n[+] some instant proximityprompt\n[+] spoof accessories\n[+] Hat limit set to 4")
 end)
 
 spawn(function()
+    PlayerStats.HatLimit.Value = 4
     while true do
         if not isrbxactive() then return end
 
@@ -78,7 +147,6 @@ spawn(function()
 
                 if SliderPos.X >= GreenBarPos.X and SliderPos.X <= GreenBarPos.X +
                     CuttingBarFrame.CutBar.GreenBar.AbsoluteSize.X then
-                    print('hit!')
                     keypress(0x43)
                     keyrelease(0x43)
                 end
@@ -131,6 +199,18 @@ spawn(function()
             end
         end
 
+        if UI.GetValue("instant_seatcustomer") then
+            local npcs = game.Workspace.NpcDestination.SpawnedNPCs
+            for _, v in ipairs(npcs:GetChildren()) do
+                if v:FindFirstChild("Torso") and v.Torso:FindFirstChild("WaitProximityPrompt") then
+                    local prompt = v.Torso.WaitProximityPrompt
+                    if prompt and prompt.Address then
+                        print('Instant seating for NPC: ' .. v.Name)
+                        memory_write("float", prompt.Address + HoldDuration, 0)
+                    end
+                end
+            end
+        end
         task.wait(.01)
     end
 end)
