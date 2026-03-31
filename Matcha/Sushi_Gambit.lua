@@ -9,6 +9,8 @@ local GameData = ReplicatedStorage:WaitForChild("GameData")
 local PlayerStats = LocalPlayer:WaitForChild("PlayerStats")
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
+local npc_list = {}
+local dasher_found_list = {}
 
 function get_offsets()
     local url = "https://imtheo.lol/Offsets/OffsetsHex.json"
@@ -20,45 +22,34 @@ local ScreenGuiEnabled = get_offsets()["Offsets"]["GuiObject"]["ScreenGui_Enable
 local HoldDuration = get_offsets()["Offsets"]["ProximityPrompt"]["HoldDuration"]
 
 UI.AddTab("Sushi Gambit", function(tab)
-    local MainSec = tab:Section("Main", "Left")
+    local MainSec = tab:Section("Main", "Left", { "Auto", "Npcs", "Others" } )
 
-    MainSec:Toggle('auto_cooking', 'Auto Cooking', function(value)
-        notify("Auto Cooking: " .. tostring(value), "", 3)
-    end)
+    if MainSec.page == 0 then
+        MainSec:Toggle('auto_cooking', 'Auto Cooking', function(value)
+            notify("Auto Cooking: " .. tostring(value), "", 3)
+        end)
 
-    MainSec:Toggle('auto_washing', 'Auto DishWashing', function(value)
-        notify("Auto DishWashing: " .. tostring(value), "", 3)
-    end)
+        MainSec:Toggle('auto_washing', 'Auto DishWashing', function(value)
+            notify("Auto DishWashing: " .. tostring(value), "", 3)
+        end)
 
-    MainSec:Toggle('auto_chloroform_spys', 'Auto Chloroform Spys', function(value)
-        notify("Auto Chloroform Spys: " .. tostring(value), "", 3)
-    end)
+        MainSec:Toggle('auto_chloroform_spys', 'Auto Chloroform Spys', function(value)
+            notify("Auto Chloroform Spys: " .. tostring(value), "", 3)
+        end)
+    elseif MainSec.page == 1 then
+        MainSec:Toggle('instant_seatcustomer', 'Instant Seat Customer', function(value)
+            notify("Instant Seat Customer: " .. tostring(value), "", 3)
+        end)
+
+        -- MainSec:Toggle('notify_dineanddash', 'Notify Dine and Dash', function(value)
+        --     notify("Notify Dine and Dash: " .. tostring(value), "", 3)
+        -- end)
+    elseif MainSec.page == 2 then
+
+    end
 
 
-    MainSec:Spacing()
-    MainSec:Text("Player")
-    MainSec:Spacing()
-
-    MainSec:Toggle('inf_stamina', 'Infinite Stamina', function(value)
-        notify("Infinite Stamina: " .. tostring(value), "", 3)
-        if value then
-            PlayerStats.StaminaUsageMultiplier.Value = -1
-            PlayerStats.StaminaGainMultiplier.Value = 100
-            PlayerStats.StaminaUsageMultiplierNonHarvestRelated.Value = 0
-        else
-            PlayerStats.StaminaUsageMultiplier.Value = 1
-            PlayerStats.StaminaUsageMultiplierNonHarvestRelated.Value = 1
-        end
-    end)
-
-    MainSec:SliderInt('player_walkspeed', 'Walk Speed', 12, 20, 1, function(value)
-        PlayerStats.WalkSpeed.Value = value
-    end)
-
-    MainSec:Spacing()
-    MainSec:Text("Accessories")
-    MainSec:Tip("Spoofing accessories. It will not showing until you own it. But you will get the boost")
-    MainSec:Spacing()
+    local PlayerTab = tab:Section("Player", "Left", { "Player", "Accessories" } )
 
     local Hat = {
         "BCHardHat",
@@ -69,26 +60,45 @@ UI.AddTab("Sushi Gambit", function(tab)
         "HeadLeaves"
     }
 
-    MainSec:Combo("acc_slot1", "Slot1", Hat, 0, function(idx, text)
-        LocalPlayer.Accessories.HatSlots["1"].Value = text
-        notify("Accessory slot 1 changed to: " .. text, "", 3)
-    end)
+    if PlayerTab.page == 0 then
+        PlayerTab:Toggle('inf_stamina', 'Infinite Stamina', function(value)
+            notify("Infinite Stamina: " .. tostring(value), "", 3)
+            if value then
+                PlayerStats.StaminaUsageMultiplier.Value = -1
+                PlayerStats.StaminaGainMultiplier.Value = 100
+                PlayerStats.StaminaUsageMultiplierNonHarvestRelated.Value = 0
+            else
+                PlayerStats.StaminaUsageMultiplier.Value = 1
+                PlayerStats.StaminaUsageMultiplierNonHarvestRelated.Value = 1
+            end
+        end)
 
-    MainSec:Combo("acc_slot2", "Slot2", Hat, 0, function(idx, text)
-        LocalPlayer.Accessories.HatSlots["2"].Value = text
-        notify("Accessory slot 2 changed to: " .. text, "", 3)
-    end)
+        MainSec:SliderInt('player_walkspeed', 'Walk Speed', 12, 20, 12, function(value)
+            PlayerStats.WalkSpeed.Value = value
+        end)
+    elseif PlayerTab.page == 1 then
 
-    MainSec:Combo("acc_slot3", "Slot3", Hat, 0, function(idx, text)
-        LocalPlayer.Accessories.HatSlots["3"].Value = text
-        notify("Accessory slot 3 changed to: " .. text, "", 3)
-    end)
+        PlayerTab:Combo("acc_slot1", "Slot1", Hat, 0, function(idx, text)
+            LocalPlayer.Accessories.HatSlots["1"].Value = text
+            notify("Accessory slot 1 changed to: " .. text, "", 3)
+        end)
+        PlayerTab:Tip("Spoofing accessories. It will not showing until you own it. But you will get the boost")
 
-    MainSec:Combo("acc_slot4", "Slot4", Hat, 0, function(idx, text)
-        LocalPlayer.Accessories.HatSlots["4"].Value = text
-        notify("Accessory slot 4 changed to: " .. text, "", 3)
-    end)
+        PlayerTab:Combo("acc_slot2", "Slot2", Hat, 0, function(idx, text)
+            LocalPlayer.Accessories.HatSlots["2"].Value = text
+            notify("Accessory slot 2 changed to: " .. text, "", 3)
+        end)
 
+        PlayerTab:Combo("acc_slot3", "Slot3", Hat, 0, function(idx, text)
+            LocalPlayer.Accessories.HatSlots["3"].Value = text
+            notify("Accessory slot 3 changed to: " .. text, "", 3)
+        end)
+
+        PlayerTab:Combo("acc_slot4", "Slot4", Hat, 0, function(idx, text)
+            LocalPlayer.Accessories.HatSlots["4"].Value = text
+            notify("Accessory slot 4 changed to: " .. text, "", 3)
+        end)
+    end
 
     local CookingSec = tab:Section("Cooking", "Right")
 
@@ -108,14 +118,22 @@ UI.AddTab("Sushi Gambit", function(tab)
     CookingSec:Text("Instant ProximityPrompt")
     CookingSec:Spacing()
 
-    CookingSec:Toggle('instant_seatcustomer', 'Seat Customer', function(value)
-        notify("Instant Seat Customer: " .. tostring(value), "", 3)
-    end)
+
     CookingSec:Spacing()
 
     CookingSec:Button('Computer', function(value)
-        local computer = game.Workspace.RestaurantArea.restaurant.Table.computer.ProximityPrompt.Address
-        memory_write("float", computer + HoldDuration, 0)
+        spawn(function()
+            while true do
+                local computer = game.Workspace.RestaurantArea.restaurant.Table.computer.ProximityPrompt.Address
+                memory_write("float", computer + HoldDuration, 0)
+                task.wait(.1)
+            end
+        end)
+    end)
+
+    CookingSec:Button('Conveyor', function(value)
+        local conveyor_keypad = game.Workspace.RestaurantArea.restaurant.mainStuff.conveyors.keypad.PromptPart.ProximityPrompt.Address
+        memory_write("float", conveyor_keypad + HoldDuration, 0)
     end)
 
     CookingSec:Button('Freezer', function(value)
@@ -129,15 +147,15 @@ UI.AddTab("Sushi Gambit", function(tab)
     end)
 
     CookingSec:Spacing()
-    CookingSec:Text("Version: 1.0.1\nDiscord: patreon\nchangelog:\n[+] player walkspeed\n[+] instant seat customer\n[+] some instant proximityprompt\n[+] spoof accessories\n[+] Hat limit set to 4")
+    CookingSec:Text("Version: 1.0.2\nDiscord: patreon\nchangelog:\n[+] Conveyor Instant Prompt\n[~] Fixed some error\n[~] Better npc check")
 end)
 
-spawn(function()
-    PlayerStats.HatLimit.Value = 4
-    while true do
-        if not isrbxactive() then return end
+PlayerStats.HatLimit.Value = 4
 
+task.spawn(function()
+    while true do
         if UI.GetValue("auto_cooking") then
+            if not PlayerGui:FindFirstChild("MakeSushiMinigame") then return end
             local addr = PlayerGui.MakeSushiMinigame.Address
             local Visible = memory_read("byte", addr + ScreenGuiEnabled)
             if Visible == 1 then
@@ -152,8 +170,14 @@ spawn(function()
                 end
             end
         end
+        task.wait(.05)
+    end
+end)
 
+task.spawn(function()
+    while true do
         if UI.GetValue("auto_washing") then
+            if not PlayerGui:FindFirstChild("DishWashingGui") then return end
             local addr = PlayerGui.DishWashingGui.Address
             local Visible = memory_read("byte", addr + ScreenGuiEnabled)
             if Visible == 1 and game.Workspace.Kitchen.TheSink.DirtyDishAmount.Value > 0 then
@@ -178,7 +202,12 @@ spawn(function()
                 end
             end
         end
+        task.wait(.01)
+    end
+end)
 
+task.spawn(function()
+    while true do
         if UI.GetValue("auto_chloroform_spys") then
             local Tool = Character:FindFirstChild("Chloroform Spray")
 
@@ -198,18 +227,30 @@ spawn(function()
                 end
             end
         end
+        task.wait(.01)
+    end
+end)
 
-        if UI.GetValue("instant_seatcustomer") then
-            local npcs = game.Workspace.NpcDestination.SpawnedNPCs
-            for _, v in ipairs(npcs:GetChildren()) do
-                if v:FindFirstChild("Torso") and v.Torso:FindFirstChild("WaitProximityPrompt") then
-                    local prompt = v.Torso.WaitProximityPrompt
+task.spawn(function()
+    while true do
+        if UI.GetValue("instant_seatcustomer") and GameData.StoreOpen.Value == true then
+            local folder = game.Workspace.NpcDestination.SpawnedNPCs
+            local children = folder:GetChildren()
+
+            for _, v in pairs(folder:GetChildren()) do
+                if not npc_list[v.Address] and v:GetAttribute("CurrentState") == "WaitingInLine" then
+                    local torso = v:FindFirstChild("Torso")
+                    local prompt = torso and torso:FindFirstChild("WaitProximityPrompt")
+
                     if prompt and prompt.Address then
-                        print('Instant seating for NPC: ' .. v.Name)
                         memory_write("float", prompt.Address + HoldDuration, 0)
+                        npc_list[v.Address] = true
                     end
                 end
             end
+        else
+            npc_list = {}
+            dasher_found_list = {}
         end
         task.wait(.01)
     end
