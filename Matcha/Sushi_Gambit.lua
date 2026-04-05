@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
+local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character
@@ -11,6 +12,20 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 local npc_list = {}
 local dasher_found_list = {}
+local dasher_list = {}
+local dasher_instances = {}
+
+local Settings = {
+    AutoCooking = false,
+    AutoWashing = false,
+    AutoChloroformSpys = false,
+    InstantSeatCustomer = false,
+    ShowDasher = false,
+    NotifyDineAndDash = false,
+    SpoofGreenbar = false,
+    InstantCleanDish = false,
+    SpoofSpongeEffectiveness = false
+}
 
 function get_offsets()
     local url = "https://imtheo.lol/Offsets/OffsetsHex.json"
@@ -22,30 +37,52 @@ local ScreenGuiEnabled = get_offsets()["Offsets"]["GuiObject"]["ScreenGui_Enable
 local HoldDuration = get_offsets()["Offsets"]["ProximityPrompt"]["HoldDuration"]
 
 UI.AddTab("Sushi Gambit", function(tab)
-    local MainSec = tab:Section("Main", "Left", { "Auto", "Npcs", "Others" } )
+    local MainSec = tab:Section("Main", "Left", { "Auto", "Npcs", "Cheat" } )
 
     if MainSec.page == 0 then
         MainSec:Toggle('auto_cooking', 'Auto Cooking', function(value)
             notify("Auto Cooking: " .. tostring(value), "", 3)
+            Settings.AutoCooking = value
         end)
 
         MainSec:Toggle('auto_washing', 'Auto DishWashing', function(value)
             notify("Auto DishWashing: " .. tostring(value), "", 3)
+            Settings.AutoWashing = value
         end)
 
         MainSec:Toggle('auto_chloroform_spys', 'Auto Chloroform Spys', function(value)
             notify("Auto Chloroform Spys: " .. tostring(value), "", 3)
+            Settings.AutoChloroformSpys = value
         end)
     elseif MainSec.page == 1 then
         MainSec:Toggle('instant_seatcustomer', 'Instant Seat Customer', function(value)
             notify("Instant Seat Customer: " .. tostring(value), "", 3)
+            Settings.InstantSeatCustomer = value
         end)
 
-        -- MainSec:Toggle('notify_dineanddash', 'Notify Dine and Dash', function(value)
-        --     notify("Notify Dine and Dash: " .. tostring(value), "", 3)
-        -- end)
+        MainSec:Toggle('show_dasher', 'Show Dasher', function(value)
+            if not Settings.InstantSeatCustomer then
+                UI.SetValue('instant_seatcustomer', true)
+            end
+            notify("Show Dasher: " .. tostring(value), "", 3)
+            Settings.ShowDasher = value
+        end)
+        MainSec:Tip('turn on Instant Seat Customer to make it work!')
     elseif MainSec.page == 2 then
+        MainSec:Toggle('spoof_greenbar', 'Spoof Greenbar', function(value)
+            notify("Spoof Greenbar: " .. tostring(value), "", 3)
+            Settings.SpoofGreenbar = value
+        end)
 
+        MainSec:Toggle('instant_clean_dish', 'Fast Clean Dish', function(value)
+            notify("Fast Clean Dish: " .. tostring(value), "", 3)
+            Settings.InstantCleanDish = value
+        end)
+
+        MainSec:Toggle('spoof_sponge_effectiveness', 'Instant Sponge Effect', function(value)
+            notify("Spoof Sponge Effectiveness: " .. tostring(value), "", 3)
+            Settings.SpoofSpongeEffectiveness = value
+        end)
     end
 
 
@@ -73,7 +110,9 @@ UI.AddTab("Sushi Gambit", function(tab)
             end
         end)
 
-        MainSec:SliderInt('player_walkspeed', 'Walk Speed', 12, 20, 12, function(value)
+        PlayerTab:Tip('Does not work with hatchet or knife for harvesting meat.')
+
+        PlayerTab:SliderInt('player_walkspeed', 'Walk Speed', 12, 20, 12, function(value)
             PlayerStats.WalkSpeed.Value = value
         end)
     elseif PlayerTab.page == 1 then
@@ -147,14 +186,32 @@ UI.AddTab("Sushi Gambit", function(tab)
     end)
 
     CookingSec:Spacing()
-    CookingSec:Text("Version: 1.0.2\nDiscord: patreon\nchangelog:\n[+] Conveyor Instant Prompt\n[~] Fixed some error\n[~] Better npc check")
+    CookingSec:Text(
+    "Version: 1.0.3\n" ..
+    "Discord: patreon\n" ..
+    "changelog:\n" ..
+    "[+] Instant Clean Dish\n[+] Show Dasher\n[+] Fast Clean Dish\n[+] Instant Sponge Effectiveness\n[+] Spoof Greenbar\n[~] Better performance"
+    )
 end)
 
 PlayerStats.HatLimit.Value = 4
 
+
+Settings = {
+    AutoCooking = UI.GetValue("auto_cooking"),
+    AutoWashing = UI.GetValue("auto_washing"),
+    AutoChloroformSpys = UI.GetValue("auto_chloroform_spys"),
+    InstantSeatCustomer = UI.GetValue("instant_seatcustomer"),
+    NotifyDineAndDash = UI.GetValue("notify_dineanddash"),
+    SpoofGreenbar = UI.GetValue("spoof_greenbar"),
+    InstantCleanDish = UI.GetValue("instant_clean_dish"),
+    SpoofSpongeEffectiveness = UI.GetValue("spoof_sponge_effectiveness"),
+    ShowDasher = UI.GetValue("show_dasher")
+}
+
 task.spawn(function()
     while true do
-        if UI.GetValue("auto_cooking") then
+        if Settings.AutoCooking then
             if not PlayerGui:FindFirstChild("MakeSushiMinigame") then return end
             local addr = PlayerGui.MakeSushiMinigame.Address
             local Visible = memory_read("byte", addr + ScreenGuiEnabled)
@@ -176,7 +233,7 @@ end)
 
 task.spawn(function()
     while true do
-        if UI.GetValue("auto_washing") then
+        if Settings.AutoWashing then
             if not PlayerGui:FindFirstChild("DishWashingGui") then return end
             local addr = PlayerGui.DishWashingGui.Address
             local Visible = memory_read("byte", addr + ScreenGuiEnabled)
@@ -202,13 +259,17 @@ task.spawn(function()
                 end
             end
         end
+
+        if UI.GetValue("instant_washing") then
+            PlayerStats.CleaningExpMultiplier.Value = 9999
+        end
         task.wait(.01)
     end
 end)
 
 task.spawn(function()
     while true do
-        if UI.GetValue("auto_chloroform_spys") then
+        if Settings.AutoChloroformSpys then
             local Tool = Character:FindFirstChild("Chloroform Spray")
 
             if Tool then
@@ -231,14 +292,13 @@ task.spawn(function()
     end
 end)
 
-task.spawn(function()
-    while true do
-        if UI.GetValue("instant_seatcustomer") and GameData.StoreOpen.Value == true then
-            local folder = game.Workspace.NpcDestination.SpawnedNPCs
-            local children = folder:GetChildren()
+RunService.Heartbeat:Connect(function()
+    local folder = game.Workspace.NpcDestination.SpawnedNPCs
 
-            for _, v in pairs(folder:GetChildren()) do
-                if not npc_list[v.Address] and v:GetAttribute("CurrentState") == "WaitingInLine" then
+    for _, v in pairs(folder:GetChildren()) do
+        if Settings.InstantSeatCustomer then
+            if v:GetAttribute("CurrentState") == "WaitingInLine" then
+                if not npc_list[v.Address] then
                     local torso = v:FindFirstChild("Torso")
                     local prompt = torso and torso:FindFirstChild("WaitProximityPrompt")
 
@@ -248,10 +308,92 @@ task.spawn(function()
                     end
                 end
             end
-        else
-            npc_list = {}
-            dasher_found_list = {}
         end
-        task.wait(.01)
+
+        if Settings.ShowDasher then
+            if npc_list[v.Address] and not dasher_found_list[v.Address] then
+                local torso = v:FindFirstChild("Torso")
+                local prompt = torso and torso:FindFirstChild("CatchDasherPrompt")
+                if prompt then
+                    print("Find dasher npc: " .. v.Address)
+                    memory_write("float", prompt.Address + HoldDuration, 0)
+                    dasher_found_list[v.Address] = true
+
+                    npc_list[v.Address] = nil
+
+                    local Text = Drawing.new("Text")
+                    Text.Text = "Dasher"
+                    Text.Color = Color3.new(1, 0, 0)
+                    Text.Center = true
+                    Text.Outline = true
+                    Text.Visible = false
+
+                    dasher_list[v.Address] = Text
+                    dasher_instances[v.Address] = v
+                end
+            end
+        end
+    end
+
+    if Settings.ShowDasher then
+        for address, textObj in pairs(dasher_list) do
+            local npc = dasher_instances[address]
+            local is_alive = false
+            local head = nil
+
+            if npc and npc.Parent then
+                local torso = npc:FindFirstChild("Torso")
+                if torso then
+                    local prompt = torso:FindFirstChild("CatchDasherPrompt")
+                    if prompt then
+                        is_alive = true
+                        head = npc:FindFirstChild("Head")
+                    end
+                end
+            end
+
+            if is_alive == false then
+                textObj:Remove()
+                dasher_list[address] = nil
+                dasher_found_list[address] = nil
+                dasher_instances[address] = nil
+            else
+                if head then
+                    local pos, onScreen = WorldToScreen(head.Position + Vector3.new(0, 1.5, 0))
+                    if onScreen then
+                        textObj.Position = pos
+                        textObj.Visible = true
+                    else
+                        textObj.Visible = false
+                    end
+                end
+            end
+        end
+    else
+        for address, textObj in pairs(dasher_list) do
+            textObj:Remove()
+        end
+        dasher_list = {}
+        dasher_found_list = {}
+        dasher_instances = {}
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if UI.GetValue('spoof_greenbar') then
+            PlayerStats.EffectiveCookingLevel.Value = 1000
+            PlayerStats.NoIngredientUseChance.Value = 1
+        end
+
+        if UI.GetValue('instant_clean_dish') then
+            PlayerStats.EffectiveCleaningLevel.Value = 9999
+        end
+
+        if UI.GetValue('spoof_sponge_effectiveness') then
+            PlayerStats.SpongeEffectiveness.Value = 9999
+        end
+
+        task.wait(.1)
     end
 end)
