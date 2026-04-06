@@ -35,6 +35,7 @@ end
 
 local ScreenGuiEnabled = get_offsets()["Offsets"]["GuiObject"]["ScreenGui_Enabled"]
 local HoldDuration = get_offsets()["Offsets"]["ProximityPrompt"]["HoldDuration"]
+local PromptEnabled = get_offsets()["Offsets"]["ProximityPrompt"]["Enabled"]
 
 UI.AddTab("Sushi Gambit", function(tab)
     local MainSec = tab:Section("Main", "Left", { "Auto", "Npcs", "Cheat" } )
@@ -86,10 +87,14 @@ UI.AddTab("Sushi Gambit", function(tab)
     end
 
 
-    local PlayerTab = tab:Section("Player", "Left", { "Player", "Accessories" } )
+    local PlayerTab = tab:Section("Player", "Left", { "Player" } )
 
     local Hat = {
-        "BCHardHat",
+        "",
+        "BunnyEars",
+        "BunnyTail",
+        "TallyTopper",
+        "OBCHardHat",
         "Pager",
         "ChefHat",
         "RobloxVisor",
@@ -117,26 +122,26 @@ UI.AddTab("Sushi Gambit", function(tab)
         end)
     elseif PlayerTab.page == 1 then
 
-        PlayerTab:Combo("acc_slot1", "Slot1", Hat, 0, function(idx, text)
-            LocalPlayer.Accessories.HatSlots["1"].Value = text
-            notify("Accessory slot 1 changed to: " .. text, "", 3)
-        end)
-        PlayerTab:Tip("Spoofing accessories. It will not showing until you own it. But you will get the boost")
+        -- PlayerTab:Combo("acc_slot1", "Slot1", Hat, 0, function(idx, text)
+        --     LocalPlayer.Accessories.HatSlots["1"].Value = tostring(text)
+        --     notify("Accessory slot 1 changed to: " .. text, "", 3)
+        -- end)
+        -- PlayerTab:Tip("Spoofing accessories. It will not showing until you own it. But you will get the boost")
 
-        PlayerTab:Combo("acc_slot2", "Slot2", Hat, 0, function(idx, text)
-            LocalPlayer.Accessories.HatSlots["2"].Value = text
-            notify("Accessory slot 2 changed to: " .. text, "", 3)
-        end)
+        -- PlayerTab:Combo("acc_slot2", "Slot2", Hat, 0, function(idx, text)
+        --     LocalPlayer.Accessories.HatSlots["2"].Value = tostring(text)
+        --     notify("Accessory slot 2 changed to: " .. text, "", 3)
+        -- end)
 
-        PlayerTab:Combo("acc_slot3", "Slot3", Hat, 0, function(idx, text)
-            LocalPlayer.Accessories.HatSlots["3"].Value = text
-            notify("Accessory slot 3 changed to: " .. text, "", 3)
-        end)
+        -- PlayerTab:Combo("acc_slot3", "Slot3", Hat, 0, function(idx, text)
+        --     LocalPlayer.Accessories.HatSlots["3"].Value = tostring(text)
+        --     notify("Accessory slot 3 changed to: " .. text, "", 3)
+        -- end)
 
-        PlayerTab:Combo("acc_slot4", "Slot4", Hat, 0, function(idx, text)
-            LocalPlayer.Accessories.HatSlots["4"].Value = text
-            notify("Accessory slot 4 changed to: " .. text, "", 3)
-        end)
+        -- PlayerTab:Combo("acc_slot4", "Slot4", Hat, 0, function(idx, text)
+        --     LocalPlayer.Accessories.HatSlots["4"].Value = tostring(text)
+        --     notify("Accessory slot 4 changed to: " .. text, "", 3)
+        -- end)
     end
 
     local CookingSec = tab:Section("Cooking", "Right")
@@ -159,6 +164,16 @@ UI.AddTab("Sushi Gambit", function(tab)
 
 
     CookingSec:Spacing()
+
+    CookingSec:Toggle('always_computer', 'Use computer during blackout', function(value) 
+        spawn(function()
+            while true do
+                local computer = game.Workspace.RestaurantArea.restaurant.Table.computer.ProximityPrompt.Address
+                memory_write("byte", computer + PromptEnabled, 1)
+                task.wait(.1)
+            end
+        end)
+    end)
 
     CookingSec:Button('Computer', function(value)
         spawn(function()
@@ -185,17 +200,21 @@ UI.AddTab("Sushi Gambit", function(tab)
         memory_write("float", toolbin + HoldDuration, 0)
     end)
 
+    CookingSec:Button('SeatingStation', function(value)
+        local SeatingStation = game.Workspace.RestaurantArea.restaurant["the waiter stand thingy"].Stations.SeatingStation.TriggerPart.SeatCustomersPrompt.Address
+        memory_write("float", SeatingStation + HoldDuration, 0)
+    end)
+
     CookingSec:Spacing()
     CookingSec:Text(
-    "Version: 1.0.3\n" ..
+    "Version: 1.0.4\n" ..
     "Discord: patreon\n" ..
     "changelog:\n" ..
-    "[+] Instant Clean Dish\n[+] Show Dasher\n[+] Fast Clean Dish\n[+] Instant Sponge Effectiveness\n[+] Spoof Greenbar\n[~] Better performance"
+    "[+] Using computer during blackout\n"..
+    "[+] Instant SeatingStation prompt\n"..
+    "[-] Remove Accessory spoofing\n"
     )
 end)
-
-PlayerStats.HatLimit.Value = 4
-
 
 Settings = {
     AutoCooking = UI.GetValue("auto_cooking"),
