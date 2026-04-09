@@ -103,6 +103,21 @@ UI.AddTab("Sushi Gambit", function(tab)
         "HeadLeaves"
     }
 
+    local background = {
+        'Intern',
+        'SofaSurfer',
+        'LineCook',
+        'JustInForTheMoney',
+        'JustInForTheExperience',
+        'TechEnthusiast',
+        'Amish',
+        'Butcher',
+        'CoffeeFanatic',
+        'UsedCarSalesman',
+        'Philanthropist',
+        'SelfAbsorbed'
+    }
+
     if PlayerTab.page == 0 then
         PlayerTab:Toggle('inf_stamina', 'Infinite Stamina', function(value)
             notify("Infinite Stamina: " .. tostring(value), "", 3)
@@ -122,24 +137,10 @@ UI.AddTab("Sushi Gambit", function(tab)
             PlayerStats.WalkSpeed.Value = value
         end)
 
-        local background = {
-            'Intern', 
-            'SofaSurfer', 
-            'LineCook', 
-            'JustInForTheMoney', 
-            'JustInForTheExperience', 
-            'TechEnthusiast',
-            'Amish',
-            'Butcher',
-            'CoffeeFanatic',
-            'UsedCarSalesman',
-            'Philanthropist',
-            'SelfAbsorbed'
-        }
-
-        PlayerTab:Combo('background', 'Career Background', background, 0, function(idx, text)
-            LocalPlayer.CareerBackground.EquippedCareerBackground.Value = tostring(text)
-        end)
+        -- PlayerTab:Combo('background', 'Career Background', background, 0, function(idx, text)
+        --     LocalPlayer.CareerBackground.EquippedCareerBackground.Value = text
+        --     notify("Career Background change to: " .. tostring(text), "", 3)
+        -- end)
 
     elseif PlayerTab.page == 1 then
         PlayerTab:Toggle('notify_admin_join', 'Admin Join', function(value)
@@ -169,7 +170,7 @@ UI.AddTab("Sushi Gambit", function(tab)
 
     CookingSec:Spacing()
 
-    CookingSec:Toggle('always_computer', 'Use computer during blackout', function(value) 
+    CookingSec:Toggle('always_computer', 'Use computer during blackout', function(value)
         spawn(function()
             while true do
                 local computer = game.Workspace.RestaurantArea.restaurant.Table.computer.ProximityPrompt.Address
@@ -214,8 +215,8 @@ UI.AddTab("Sushi Gambit", function(tab)
     "Version: 1.0.5\n" ..
     "Discord: patreon\n" ..
     "changelog:\n" ..
-    "[+] Admin join notify\n"..
-    "[+] Spoof Career Background"
+    "[+] Admin join notify\n" 
+    -- "[+] Spoof Career Background"
     )
 end)
 
@@ -233,14 +234,8 @@ Settings = {
 }
 
 local Admin = {
-    ["UserIds"] = {105479622, 65095440, 1425697210, 126961971, 127528152, 319065798, 2754844524, 125440222, 1783725423}
+    ["UserIds"] = { 105479622, 65095440, 1425697210, 126961971, 127528152, 319065798, 2754844524, 125440222, 1783725423 }
 }
-
-Players.PlayerAdded:Connect(function(player)
-    if table.find(Admin.UserIds, player.UserId) and Settings.NotifyAdminJoin then
-        notify("Admin Joined: " .. player.Name, 8)
-    end
-end)
 
 task.spawn(function()
     while true do
@@ -428,5 +423,11 @@ RunService.Heartbeat:Connect(function()
         dasher_list = {}
         dasher_found_list = {}
         dasher_instances = {}
+    end
+end)
+
+Players.PlayerAdded:Connect(function(player)
+    if table.find(Admin.UserIds, player.UserId) and Settings.NotifyAdminJoin then
+        notify("Admin Joined: " .. player.Name, 8)
     end
 end)
