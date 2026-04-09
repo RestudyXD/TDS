@@ -24,7 +24,8 @@ local Settings = {
     NotifyDineAndDash = false,
     SpoofGreenbar = false,
     InstantCleanDish = false,
-    SpoofSpongeEffectiveness = false
+    SpoofSpongeEffectiveness = false,
+    NotifyAdminJoin = false
 }
 
 function get_offsets()
@@ -87,7 +88,7 @@ UI.AddTab("Sushi Gambit", function(tab)
     end
 
 
-    local PlayerTab = tab:Section("Player", "Left", { "Player" } )
+    local PlayerTab = tab:Section("Player", "Left", { "Player", "Notify" } )
 
     local Hat = {
         "",
@@ -120,28 +121,31 @@ UI.AddTab("Sushi Gambit", function(tab)
         PlayerTab:SliderInt('player_walkspeed', 'Walk Speed', 12, 20, 12, function(value)
             PlayerStats.WalkSpeed.Value = value
         end)
+
+        local background = {
+            'Intern', 
+            'SofaSurfer', 
+            'LineCook', 
+            'JustInForTheMoney', 
+            'JustInForTheExperience', 
+            'TechEnthusiast',
+            'Amish',
+            'Butcher',
+            'CoffeeFanatic',
+            'UsedCarSalesman',
+            'Philanthropist',
+            'SelfAbsorbed'
+        }
+
+        PlayerTab:Combo('background', 'Career Background', background, 0, function(idx, text)
+            LocalPlayer.CareerBackground.EquippedCareerBackground.Value = tostring(text)
+        end)
+
     elseif PlayerTab.page == 1 then
-
-        -- PlayerTab:Combo("acc_slot1", "Slot1", Hat, 0, function(idx, text)
-        --     LocalPlayer.Accessories.HatSlots["1"].Value = tostring(text)
-        --     notify("Accessory slot 1 changed to: " .. text, "", 3)
-        -- end)
-        -- PlayerTab:Tip("Spoofing accessories. It will not showing until you own it. But you will get the boost")
-
-        -- PlayerTab:Combo("acc_slot2", "Slot2", Hat, 0, function(idx, text)
-        --     LocalPlayer.Accessories.HatSlots["2"].Value = tostring(text)
-        --     notify("Accessory slot 2 changed to: " .. text, "", 3)
-        -- end)
-
-        -- PlayerTab:Combo("acc_slot3", "Slot3", Hat, 0, function(idx, text)
-        --     LocalPlayer.Accessories.HatSlots["3"].Value = tostring(text)
-        --     notify("Accessory slot 3 changed to: " .. text, "", 3)
-        -- end)
-
-        -- PlayerTab:Combo("acc_slot4", "Slot4", Hat, 0, function(idx, text)
-        --     LocalPlayer.Accessories.HatSlots["4"].Value = tostring(text)
-        --     notify("Accessory slot 4 changed to: " .. text, "", 3)
-        -- end)
+        PlayerTab:Toggle('notify_admin_join', 'Admin Join', function(value)
+            notify("Notify Admin Join: " .. tostring(value), "", 3)
+            Settings.NotifyAdminJoin = value
+        end)
     end
 
     local CookingSec = tab:Section("Cooking", "Right")
@@ -207,12 +211,11 @@ UI.AddTab("Sushi Gambit", function(tab)
 
     CookingSec:Spacing()
     CookingSec:Text(
-    "Version: 1.0.4\n" ..
+    "Version: 1.0.5\n" ..
     "Discord: patreon\n" ..
     "changelog:\n" ..
-    "[+] Using computer during blackout\n"..
-    "[+] Instant SeatingStation prompt\n"..
-    "[-] Remove Accessory spoofing\n"
+    "[+] Admin join notify\n"..
+    "[+] Spoof Career Background"
     )
 end)
 
@@ -225,8 +228,19 @@ Settings = {
     SpoofGreenbar = UI.GetValue("spoof_greenbar"),
     InstantCleanDish = UI.GetValue("instant_clean_dish"),
     SpoofSpongeEffectiveness = UI.GetValue("spoof_sponge_effectiveness"),
-    ShowDasher = UI.GetValue("show_dasher")
+    ShowDasher = UI.GetValue("show_dasher"),
+    NotifyAdminJoin = UI.GetValue("notify_admin_join")
 }
+
+local Admin = {
+    ["UserIds"] = {105479622, 65095440, 1425697210, 126961971, 127528152, 319065798, 2754844524, 125440222, 1783725423}
+}
+
+Players.PlayerAdded:Connect(function(player)
+    if table.find(Admin.UserIds, player.UserId) and Settings.NotifyAdminJoin then
+        notify("Admin Joined: " .. player.Name, 8)
+    end
+end)
 
 task.spawn(function()
     while true do
@@ -308,6 +322,25 @@ task.spawn(function()
             end
         end
         task.wait(.01)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if UI.GetValue('spoof_greenbar') then
+            PlayerStats.EffectiveCookingLevel.Value = 1000
+            PlayerStats.NoIngredientUseChance.Value = 1
+        end
+
+        if UI.GetValue('instant_clean_dish') then
+            PlayerStats.EffectiveCleaningLevel.Value = 9999
+        end
+
+        if UI.GetValue('spoof_sponge_effectiveness') then
+            PlayerStats.SpongeEffectiveness.Value = 9999
+        end
+
+        task.wait(.1)
     end
 end)
 
@@ -395,24 +428,5 @@ RunService.Heartbeat:Connect(function()
         dasher_list = {}
         dasher_found_list = {}
         dasher_instances = {}
-    end
-end)
-
-task.spawn(function()
-    while true do
-        if UI.GetValue('spoof_greenbar') then
-            PlayerStats.EffectiveCookingLevel.Value = 1000
-            PlayerStats.NoIngredientUseChance.Value = 1
-        end
-
-        if UI.GetValue('instant_clean_dish') then
-            PlayerStats.EffectiveCleaningLevel.Value = 9999
-        end
-
-        if UI.GetValue('spoof_sponge_effectiveness') then
-            PlayerStats.SpongeEffectiveness.Value = 9999
-        end
-
-        task.wait(.1)
     end
 end)
