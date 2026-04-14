@@ -276,7 +276,8 @@ UI.AddTab("Sushi Gambit", function(tab)
     "[+] Police NPC ESP\n" ..
     "[+] Remove showing dasher when caught\n"..
     "[~] Better ESP logic\n" ..
-    "[~] Beautify UI and add more settings"
+    "[~] Beautify UI and add more settings\n"..
+    "[~] Fixed DishWashing Error"
     )
 end)
 
