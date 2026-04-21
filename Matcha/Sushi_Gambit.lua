@@ -73,6 +73,14 @@ local ESP_SETTINGS = {
         Enabled = false,
         Color = Color3.new(0, 0, 1)
     },
+    Critic = {
+        Enabled = false,
+        Color = Color3.new(255, 252, 0)
+    },
+    HealthInspector = {
+        Enabled = false,
+        Color = Color3.new(1, 0, 0)
+    },
     Windows = {
         Enabled = false
     },
@@ -293,7 +301,7 @@ local fishLabel = nil
 local HumanFlesh = nil
 local Rice = nil
 
-local Windows = Lib.new("Sushi Gambit", 150, 50)
+local Windows = Lib.new("Sushi Gambit", 150, 55)
 Windows:Show(false)
 
 function get_offsets()
@@ -347,6 +355,7 @@ UI.AddTab("Sushi Gambit", function(tab)
             notify("Auto DishWashing: " .. tostring(value), "", 3)
             SETTINGS.Auto.Washing.Enabled = value
         end)
+        MainSec:Tip("Don't Afk in the sink too long!!!")
 
         MainSec:Toggle('auto_chloroform_spys', 'Auto Chloroform Spys', function(value)
             notify("Auto Chloroform Spys: " .. tostring(value), "", 3)
@@ -507,6 +516,24 @@ UI.AddTab("Sushi Gambit", function(tab)
             ESP_SETTINGS.Police.Color = Color3.new(color.R, color.G, color.B)
         end)
 
+        NpcTab:Toggle('show_critic', 'Critic', function(value)
+            notify("Show Critic: " .. tostring(value), "", 3)
+            ESP_SETTINGS.Critic.Enabled = value
+        end)
+
+        NpcTab:ColorPicker("critic_color", 255, 252, 0, 1, function(color, alpha)
+            ESP_SETTINGS.Critic.Color = Color3.new(color.R, color.G, color.B)
+        end)
+
+        NpcTab:Toggle('show_health_inspector', 'Health Inspector', function(value)
+            notify("Show Health Inspector: " .. tostring(value), "", 3)
+            ESP_SETTINGS.HealthInspector.Enabled = value
+        end)
+
+        NpcTab:ColorPicker("health_inspector_color", 1, 0, 0, 1, function(color, alpha)
+            ESP_SETTINGS.HealthInspector.Color = Color3.new(color.R, color.G, color.B)
+        end)
+
     elseif NpcTab.page == 1 then
     end
 
@@ -608,10 +635,12 @@ UI.AddTab("Sushi Gambit", function(tab)
     local InfoSec = tab:Section("Info", "Right")
 
     InfoSec:Text(
-    "Version: 1.0.7\n" ..
+    "Version: 1.0.8\n" ..
     "Discord: patreon\n" ..
     "changelog:\n" ..
-    "[+] Status Window with useful info"
+    "[+] Show Critic\n" ..
+    "[+] Show Health Inspector\n" ..
+    "[~] Fixed Auto Dishwashing not working\n"
     )
 end)
 
@@ -629,13 +658,10 @@ SETTINGS.Notify.DineAndDash.Enabled = UI.GetValue("notify_dineanddash")
 SETTINGS.Notify.AdminJoin.Enabled = UI.GetValue("notify_admin_join")
 
 ESP_SETTINGS.Dasher.Enabled = UI.GetValue("show_dasher")
-ESP_SETTINGS.Dasher.Color = Color3.new(1, 0, 0)
-
 ESP_SETTINGS.Armed.Enabled = UI.GetValue("show_armed")
-ESP_SETTINGS.Armed.Color = Color3.new(1, 0, 0)
-
 ESP_SETTINGS.Police.Enabled = UI.GetValue("show_police")
-ESP_SETTINGS.Police.Color = Color3.new(0, 0, 1)
+ESP_SETTINGS.Critic.Enabled = UI.GetValue("show_critic")
+ESP_SETTINGS.HealthInspector.Enabled = UI.GetValue("show_health_inspector")
 
 ESP_SETTINGS.Windows.Enabled = UI.GetValue("show_statuswindow")
 ESP_SETTINGS.Labels.day = UI.GetValue("show_daycounter")
@@ -692,16 +718,17 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-    while true do
-        if SETTINGS.Auto.Washing.Enabled and game.Workspace.Kitchen.TheSink.DirtyDishAmount.Value > 0 then
-            if not PlayerGui:FindFirstChild("DishWashingGui") then return end
+    while SETTINGS.Auto.Washing.Enabled do
+        if not PlayerGui:FindFirstChild("DishWashingGui") then return end
+        if not SETTINGS.Auto.Washing.Enabled then return end
+        local dirty = game.Workspace.Kitchen.TheSink.DirtyDishAmount.Value
+        if dirty and dirty > 0 then
             local addr = PlayerGui.DishWashingGui.Address
             local Visible = memory_read("byte", addr + ScreenGuiEnabled)
             if Visible == 1 then
                 for i, v in pairs(PlayerGui.DishWashingGui.MainFrame.QueueBarFrame.Queue.KeysHolder:GetChildren()) do
                     if v:IsA("Frame") and v.Name == "KeyTemplate" then
                         local key = v:GetAttribute("Key")
-
                         if key == "Q" then
                             keypress(0x51)
                             keyrelease(0x51)
@@ -719,11 +746,7 @@ task.spawn(function()
                 end
             end
         end
-
-        if UI.GetValue("instant_washing") then
-            PlayerStats.CleaningExpMultiplier.Value = 9999
-        end
-        task.wait(.01)
+        task.wait(.1)
     end
 end)
 
@@ -923,7 +946,6 @@ RunService.Heartbeat:Connect(function()
         entity:Update(pos, onScreen, enabled)
     end
 end)
-
 task.spawn(function()
     while true do
         if not isrbxactive() then return end
@@ -1003,6 +1025,37 @@ task.spawn(function()
                 end
             end
 
+            if ESP_SETTINGS.Critic.Enabled and npc:GetAttribute("Critic") == true then
+
+                if not Manager.Entities[npc.Address] then
+                    Manager:Add(
+                    npc.Address,
+                    Entity.new(npc, Drawing.new("Text"), "Critic")
+                    )
+                else
+                    Manager.Entities[npc.Address].Instance = npc
+                end
+            else
+                if Manager.Entities[npc.Address] and Manager.Entities[npc.Address].Type == "Critic" then
+                    Manager:Remove(npc.Address)
+                end
+            end
+
+            if ESP_SETTINGS.HealthInspector.Enabled and npc:GetAttribute("Behavior") == "Inspector" then
+
+                if not Manager.Entities[npc.Address] then
+                    Manager:Add(
+                    npc.Address,
+                    Entity.new(npc, Drawing.new("Text"), "Health Inspector")
+                    )
+                else
+                    Manager.Entities[npc.Address].Instance = npc
+                end
+            else
+                if Manager.Entities[npc.Address] and Manager.Entities[npc.Address].Type == "Health Inspector" then
+                    Manager:Remove(npc.Address)
+                end
+            end
         end
 
         if PlayerGui.clockGui.clockFrame.clockLabel.Text == "08:00" then
