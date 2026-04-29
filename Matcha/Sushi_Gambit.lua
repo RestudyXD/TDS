@@ -739,7 +739,8 @@ task.spawn(function()
         if SETTINGS.Auto.Washing.Enabled then
             if not PlayerGui:FindFirstChild("DishWashingGui") then continue end
             if not SETTINGS.Auto.Washing.Enabled then return end
-            local amount = game.Workspace.Kitchen.TheSink.DirtyDishAmount.Value
+            local sink = game.Workspace.Kitchen:FindFirstChild("TheSink")
+            local amount = sink and sink.DirtyDishAmount.Value
             local addr = PlayerGui.DishWashingGui.Address
             if amount and amount == 0 then continue end
             local Visible = memory_read("byte", addr + ScreenGuiEnabled)
