@@ -18,7 +18,7 @@ local SETTINGS = {
         },
         Washing = {
             Enabled = false,
-            delay = 0
+            delay = 0.1
         },
         ChloroformSpys = {
             Enabled = false,
@@ -357,7 +357,9 @@ UI.AddTab("Sushi Gambit", function(tab)
             notify("Auto DishWashing: " .. tostring(value), "", 3)
             SETTINGS.Auto.Washing.Enabled = value
         end)
-        MainSec:Tip("Don't Afk in the sink too long!!!")
+        MainSec:SliderFloat('auto_washing_delay', 'Delay (ms)', 0.1, 2.0, 0.1, '%.1f', function(value)
+            SETTINGS.Auto.Washing.delay = value
+        end)
 
         MainSec:Toggle('auto_chloroform_spys', 'Auto Chloroform Spys', function(value)
             notify("Auto Chloroform Spys: " .. tostring(value), "", 3)
@@ -642,18 +644,19 @@ UI.AddTab("Sushi Gambit", function(tab)
     local InfoSec = tab:Section("Info", "Right")
 
     InfoSec:Text(
-    "Version: 1.0.9\n" ..
+    "Version: 1.1.0\n" ..
     "Discord: patreon\n" ..
     "changelog:\n" ..
-    "[+] Npc Max Distance\n" ..
-    "[~] Better Npc ESP\n" ..
-    "[~] Fixed Sponge Effectiveness error\n"
+    "[+] DishWashing Delay\n" ..
+    "[~] Fixed DishWashing not working\n"
     )
 end)
 
 SETTINGS.Auto.Cooking.Enabled = UI.GetValue("auto_cooking")
+
 SETTINGS.Auto.Washing.Enabled = UI.GetValue("auto_washing")
 SETTINGS.Auto.ChloroformSpys.Enabled = UI.GetValue("auto_chloroform_spys")
+
 
 SETTINGS.Cheat.Instant.SeatCustomer.Enabled = UI.GetValue("instant_seatcustomer")
 SETTINGS.Cheat.Instant.CleanDish.Enabled = UI.GetValue("instant_clean_dish")
@@ -705,7 +708,7 @@ end)
 task.spawn(function()
     while true do
         if SETTINGS.Auto.Cooking.Enabled then
-            if not PlayerGui:FindFirstChild("MakeSushiMinigame") then return end
+            if not PlayerGui:FindFirstChild("MakeSushiMinigame") then continue end
             local addr = PlayerGui.MakeSushiMinigame.Address
             local Visible = memory_read("byte", addr + ScreenGuiEnabled)
             if Visible == 1 then
@@ -724,36 +727,38 @@ task.spawn(function()
     end
 end)
 
+local key_map = {
+    Q = 0x51,
+    E = 0x45,
+    R = 0x52,
+    F = 0x46
+}
+
 task.spawn(function()
-    while SETTINGS.Auto.Washing.Enabled do
-        if not PlayerGui:FindFirstChild("DishWashingGui") then return end
-        if not SETTINGS.Auto.Washing.Enabled then return end
-        local dirty = game.Workspace.Kitchen.TheSink.DirtyDishAmount.Value
-        if dirty and dirty > 0 then
+    while true do
+        if SETTINGS.Auto.Washing.Enabled then
+            if not PlayerGui:FindFirstChild("DishWashingGui") then continue end
+            if not SETTINGS.Auto.Washing.Enabled then return end
+            local amount = game.Workspace.Kitchen.TheSink.DirtyDishAmount.Value
             local addr = PlayerGui.DishWashingGui.Address
+            if amount and amount == 0 then continue end
             local Visible = memory_read("byte", addr + ScreenGuiEnabled)
             if Visible == 1 then
                 for i, v in pairs(PlayerGui.DishWashingGui.MainFrame.QueueBarFrame.Queue.KeysHolder:GetChildren()) do
                     if v:IsA("Frame") and v.Name == "KeyTemplate" then
                         local key = v:GetAttribute("Key")
-                        if key == "Q" then
-                            keypress(0x51)
-                            keyrelease(0x51)
-                        elseif key == "E" then
-                            keypress(0x45)
-                            keyrelease(0x45)
-                        elseif key == "R" then
-                            keypress(0x52)
-                            keyrelease(0x52)
-                        elseif key == "F" then
-                            keypress(0x46)
-                            keyrelease(0x46)
+                        local vk = key_map[key]
+
+                        if vk then
+                            keypress(vk)
+                            keyrelease(vk)
+                            task.wait(SETTINGS.Auto.Washing.delay)
                         end
                     end
                 end
             end
         end
-        task.wait(.1)
+        task.wait(0.1)
     end
 end)
 
@@ -957,7 +962,6 @@ task.spawn(function()
         task.wait(0.5)
     end
 end)
-
 
 task.spawn(function()
     while true do
